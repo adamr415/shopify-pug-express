@@ -1,0 +1,164 @@
+html
+  head
+    title='title'
+    link(rel="stylesheet" href="../css/bootstrap.min.css")
+    link(rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css")
+    //- script(type='text/javascript' src="https://code.jquery.com/jquery-3.3.1.min.js")
+    //- script(type='text/javascript' src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js")
+    script(type='text/javascript' src="../js/jquery.min.js")
+    script(type='text/javascript' src="../js/bootstrap.min.js")
+    script(type='text/javascript' src="../js/jquery.dataTables.min.js")
+    script(type="text/javascript").
+      jQuery(document).ready(function($){
+        $('#csvresults').DataTable();
+      });
+
+  body
+    form(method='POST' action='/update')
+      //- button.btn.btn-primary(type='submit') Update Price
+      button.btn.btn-primary(name='updatePrice' onclick="returnChecks();return false;") Update Price
+      table#csvresults
+        thead
+          tr
+            th
+              div.form-group
+                input#name.form-control(type='checkbox', name='itemCheckboxAll' onclick="javascript:checkAll(this)")
+            th='ID'
+            th='Artist'
+            th="Name"
+            th='Manufactured'
+            th='Price'
+            th='Origin Country'
+            th='Main Category'
+            th='Sub Category'
+            th='Width'
+            th='Height'
+
+        tbody
+          each poster in data
+            tr
+              td
+                div.form-group
+                  input#name.form-control(type='checkbox', name='itemCheckbox')
+              td
+                p= poster['Product ID']
+              td
+                p= poster.Artist
+              td
+                p= poster['Product Name']
+              td
+                p= poster['Manufaturer Date']
+              td
+                p= '$' + poster['Web price']
+              td
+                p= poster['Country Of Origin']
+              td
+                p= poster['Web Main Category']
+              td
+                p= poster['Web Sub Category']
+              td
+                p= poster['Width'] + '"'
+              td
+                p= poster['Height'] + '"'
+
+      button.btn.btn-primary(type='submit') Update Price
+
+    style(type='text/css').
+            /* Center tables for demo */
+            table {
+              margin: 0 auto;
+              font-family: sans-serif;
+            }
+
+            /* Default Table Style */
+            table {
+              color: #333;
+              background: white;
+              border: 1px solid grey;
+              font-size: 12pt;
+              border-collapse: collapse;
+            }
+            table thead th,
+            table tfoot th {
+              color: #777;
+              background: rgba(0,0,0,.1);
+            }
+            table caption {
+              padding:.5em;
+            }
+            table th,
+            table td {
+              padding: .5em;
+              border: 1px solid lightgrey;
+              min-width: 40px;
+            }
+
+
+    script(type='text/javascript').
+      var posters = !{JSON.stringify(data)}
+      console.log(posters);
+      //- Check All Checkboxes Check
+      function checkAll(o) {
+        var boxes = document.getElementsByTagName("input");
+        for (var x = 0; x < boxes.length; x++) {
+          var obj = boxes[x];
+          if (obj.type == "checkbox") {
+            if (obj.name != "check")
+              obj.checked = o.checked;
+          }
+        }
+      }
+      //- Return object from selected rows
+      function returnChecks() {
+        console.log('stuuuuufff2');
+
+        checkedRows = [];
+
+        ckbox = document.getElementsByName("itemCheckbox");
+        count=0;
+        for(var i=0;i<ckbox.length;i++){
+          element = ckbox[i];
+          if(element.checked){
+            //console.log(element.parentNode.parentNode.parentNode)
+            //console.log(posters[i]);
+            //- Add checked items to array
+            checkedRows.push(posters[i]);
+            count++;
+          }
+        }
+
+        console.log("Number : " + count);
+        console.dir(checkedRows);
+        sendData(checkedRows)
+
+      }
+
+      function sendData(data) {
+        var XHR = new XMLHttpRequest();
+        var FD  = new FormData();
+
+        // Push our data into our FormData object
+        //- for(name in data) {
+        //-   FD.append(name, data[name]);
+        //- }
+
+        // Define what happens on successful data submission
+        XHR.addEventListener('load', function(event) {
+          alert('Yeah! Data sent and response loaded.');
+        });
+
+        // Define what happens in case of error
+        XHR.addEventListener('error', function(event) {
+          alert('Oops! Something went wrong.');
+        });
+
+        // Set up our request
+        XHR.open('POST', '/update');
+        XHR.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+
+
+        // Send our FormData object; HTTP headers are set automatically
+        XHR.send(JSON.stringify(data));
+      }
+
+
